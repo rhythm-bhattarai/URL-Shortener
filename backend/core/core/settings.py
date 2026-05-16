@@ -25,8 +25,9 @@ SECRET_KEY = 'django-insecure-)tbwea-t4u@i&@y_)6a_xuyv)32=(-1ucjgkw!9edg(4du@8pz
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
+CORS_ALLOW_CREDENTIALS = True
 
 # Application definition
 
@@ -52,6 +53,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
+    'api.middleware.RateLimitMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'
@@ -120,3 +123,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "rate-limit-testing-buffer",
+    }
+}
