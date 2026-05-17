@@ -103,18 +103,10 @@ The frontend will be available at `http://localhost:5173`.
 
 ## Environment Variables
 
-When running manually, create a `.env` file inside the `/backend` folder:
+When running manually, create a `.env` file inside the `/frontend` folder:
 
 ```env
-DEBUG=True
-SECRET_KEY=your-secret-key-here
-REDIS_URL=redis://localhost:6379/0
-CORS_ALLOWED_ORIGINS=http://localhost:5173
-DB_NAME=url_shortener
-DB_USER=postgres
-DB_PASSWORD=postgres_dev_password
-DB_HOST=localhost
-DB_PORT=5432
+VITE_API_BASE_URL = 'http://127.0.0.1:8000' or '<your-base-backend-url>'
 ```
 
 When running with Docker, environment variables are already configured in `docker-compose.yml` and no `.env` file is needed.
