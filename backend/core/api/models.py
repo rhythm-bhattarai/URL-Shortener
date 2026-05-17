@@ -8,7 +8,7 @@ class URL(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.short_url} -> {self.long_url}"
+        return f"{self.short_url} -> {self.original_url}"
 
 class Click(models.Model):
     url = models.ForeignKey(URL, on_delete=models.CASCADE, related_name='clicks')

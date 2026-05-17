@@ -23,11 +23,8 @@ class RateLimitMiddleware:
             current_minute = time.strftime('%Y%m%d%H%M', time.gmtime())
             redis_key = f"rl:{ip_address}:{current_minute}"
 
-            try:
-                current_count = cache.incr(redis_key)
-            except ValueError:
-                cache.set(redis_key, 1, timeout=60)
-                current_count = 1
+            cache.add(redis_key, 0, timeout=60) 
+            current_count = cache.incr(redis_key)
 
             if current_count > self.RATE_LIMIT:
                 seconds_remaining = 60 - int(time.time() % 60)

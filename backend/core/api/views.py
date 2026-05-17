@@ -17,7 +17,7 @@ class ShortenURLView(APIView):
     def get(self, request):
         urls = URL.objects.all().order_by('-created_at')
         data = []
-        for url in urls:
+        for url in urls :
             data.append({
                 "id": url.id,
                 "original_url": url.original_url,

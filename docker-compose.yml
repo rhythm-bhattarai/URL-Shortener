@@ -1,0 +1,57 @@
+services:
+  # db -postgresql
+  db:
+    image: postgres:15-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_DB=url_shortener
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres_dev_password
+    ports:
+      - "5432:5432"
+
+  # caching layer -redis
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  # api layer - drf
+  web:
+    build: ./backend
+    command: >
+      bash -c "python core/manage.py migrate &&
+             python core/manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=1
+      - DB_NAME=url_shortener
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres_dev_password
+      - DB_HOST=db
+      - DB_PORT=5432
+      - REDIS_URL=redis://redis:6379/1
+    depends_on:
+      - db
+      - redis
+
+  # user interface layers
+  frontend:
+    build: ./frontend
+    command: npm run dev -- --host 0.0.0.0
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    depends_on:
+      - web
+
+volumes:
+  postgres_data:
