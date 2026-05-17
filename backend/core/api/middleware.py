@@ -10,7 +10,7 @@ class RateLimitMiddleware:
 
     def __call__(self, request):
 
-        if request.path.startswith('/api/'):
+        if request.path.startswith('/api/shorten/') and request.method == 'POST':
         
             ip_address = request.META.get('HTTP_X_FORWARDED_FOR')
 
