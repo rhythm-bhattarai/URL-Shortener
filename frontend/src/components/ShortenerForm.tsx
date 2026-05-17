@@ -47,12 +47,12 @@ export const ShortenerForm: React.FC<ShortenerFormProps> = ({ onLinkCreated }) =
   };
 
   return (
-    <Card bordered={false} style={{ borderRadius: '12px', marginBottom: '24px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+    <Card style={{ borderRadius: '12px', marginBottom: '24px', boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
       <Title level={4} style={{ marginTop: 0 }}>Create New Link</Title>
       <div style={{ display: 'flex', gap: '8px' }}>
         <Input 
           size="large" 
-          placeholder="Paste your long URL here..." 
+          placeholder="Paste your long URL here... eg. https://www.example.com/some/very/long/path" 
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           onPressEnter={handleSubmit}
@@ -66,7 +66,7 @@ export const ShortenerForm: React.FC<ShortenerFormProps> = ({ onLinkCreated }) =
       <AnimatePresence mode="wait">
         {error && (
           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} style={{ marginTop: '16px', overflow: 'hidden' }}>
-            <Alert message={error} type="error" showIcon />
+            <Alert title="Error" message={error} type="error" showIcon />
           </motion.div>
         )}
       </AnimatePresence>
