@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Card, Spin, Empty, Button, Tooltip } from 'antd';
+import { Spin, Empty, Button, Tooltip } from 'antd';
 import { ReloadOutlined } from '@ant-design/icons';
 import { ApiService } from '../services/ApiService';
 import { type AnalyticsResponse } from '../types/Types';
@@ -13,44 +13,36 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ shortUrlCode }) =>
   const [data, setData] = useState<AnalyticsResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  
+
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const chartInstanceRef = useRef<Chart | null>(null);
-  
-  // Guard ref to prevent React StrictMode or re-renders from double-firing on mount
   const hasFetched = useRef(false);
 
-  // 1. Core Fetch Logic
   const fetchAnalytics = async (isRefresh = false) => {
     if (isRefresh) {
       setRefreshing(true);
     } else {
       setLoading(true);
     }
-
     try {
-      console.log(`Sending API request for code: ${shortUrlCode}`); // Track requests in your browser console
       const response = await ApiService.getAnalytics(shortUrlCode);
       setData(response);
     } catch (err) {
-      console.error("Error fetching analytics:", err);
+      console.error('Error fetching analytics:', err);
     } finally {
       setLoading(false);
       setRefreshing(false);
     }
   };
 
-  // 2. STABLE INITIAL FETCH (Fires exactly once per code change)
   useEffect(() => {
-    hasFetched.current = false; // Reset for new codes
-    
+    hasFetched.current = false;
     if (!hasFetched.current) {
       fetchAnalytics(false);
       hasFetched.current = true;
     }
-  }, [shortUrlCode]); 
+  }, [shortUrlCode]);
 
-  // 3. Chart.js Engine Handler
   useEffect(() => {
     if (!data || !canvasRef.current) return;
 
@@ -65,20 +57,57 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ shortUrlCode }) =>
       type: 'line',
       data: {
         labels: data.timeline.map((item) => item.date),
-        datasets: [{
-          label: 'Total Clicks',
-          data: data.timeline.map((item) => item.count),
-          borderColor: '#1890ff',
-          backgroundColor: 'rgba(24, 144, 255, 0.2)',
-          fill: true,
-          tension: 0.3
-        }]
+        datasets: [
+          {
+            label: 'Total Clicks',
+            data: data.timeline.map((item) => item.count),
+            borderColor: '#0a0a0a',
+            backgroundColor: 'rgba(10, 10, 10, 0.06)',
+            borderWidth: 2,
+            pointBackgroundColor: '#0a0a0a',
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            fill: true,
+            tension: 0.3,
+          },
+        ],
       },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }
-      }
+        plugins: {
+          legend: {
+            display: false,
+          },
+          tooltip: {
+            backgroundColor: '#0a0a0a',
+            titleFont: { family: "'IBM Plex Mono', monospace", size: 11 },
+            bodyFont: { family: "'IBM Plex Mono', monospace", size: 12 },
+            padding: 10,
+            cornerRadius: 0,
+          },
+        },
+        scales: {
+          x: {
+            grid: { color: '#e8e8e8', lineWidth: 1 },
+            ticks: {
+              font: { family: "'IBM Plex Mono', monospace", size: 11 },
+              color: '#888',
+            },
+            border: { color: '#0a0a0a', width: 2 },
+          },
+          y: {
+            beginAtZero: true,
+            ticks: {
+              stepSize: 1,
+              font: { family: "'IBM Plex Mono', monospace", size: 11 },
+              color: '#888',
+            },
+            grid: { display: false },
+            border: { color: '#0a0a0a', width: 2 },
+          },
+        },
+      },
     });
 
     return () => {
@@ -90,47 +119,102 @@ export const AnalyticsPage: React.FC<AnalyticsPageProps> = ({ shortUrlCode }) =>
 
   if (loading) {
     return (
-      <div style={{ textAlign: 'center', marginTop: '50px' }}>
-        <Spin size="large" description="Loading metrics..." />
+      <div style={{ textAlign: 'center', padding: '48px 0' }}>
+        <Spin size="large" />
+        <p style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: '#888', marginTop: 12 }}>
+          loading metrics...
+        </p>
       </div>
     );
   }
 
   if (!data) {
-    return <Empty description="Could not load analytics for this link." />;
+    return (
+      <div style={{ padding: '40px', textAlign: 'center' }}>
+        <Empty description={
+          <span style={{ fontFamily: "'IBM Plex Mono', monospace", fontSize: 12, color: '#888' }}>
+            could not load analytics for this link.
+          </span>
+        } />
+      </div>
+    );
   }
 
   return (
-    <Card 
-      title={`Tracking Insight: ${shortUrlCode}`}
-      style={{ marginTop: '24px', borderRadius: '8px' }}
-      extra={
+    <div style={{ fontFamily: "'IBM Plex Mono', monospace" }}>
+      {/* Panel header */}
+      <div style={{
+        padding: '16px 24px',
+        borderBottom: '2px solid #0a0a0a',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        background: '#fff',
+      }}>
+        <div>
+          <span style={{ fontSize: 10, color: '#999', letterSpacing: '2px', textTransform: 'uppercase', display: 'block', marginBottom: 4 }}>
+            // analytics
+          </span>
+          <span style={{ fontSize: 14, fontWeight: 700, color: '#0a0a0a' }}>{shortUrlCode}</span>
+        </div>
         <Tooltip title="Refresh stats">
-          <Button 
-            type="primary" 
-            icon={<ReloadOutlined spin={refreshing} />} 
-            onClick={() => fetchAnalytics(true)} // Explicit user trigger
+          <Button
+            icon={<ReloadOutlined spin={refreshing} />}
+            onClick={() => fetchAnalytics(true)}
             disabled={refreshing}
           >
             Refresh
           </Button>
         </Tooltip>
-      }
-    >
-      <div style={{ marginBottom: '30px', padding: '16px', backgroundColor: '#fafafa', borderRadius: '8px' }}>
-        <div style={{ fontSize: '16px', marginBottom: '8px' }}>
-          <strong>Total Clicks: </strong> 
-          <span style={{ color: '#1890ff', fontSize: '18px' }}>{data.total_clicks}</span>
+      </div>
+
+      {/* Stats row */}
+      <div style={{ display: 'flex', borderBottom: '1px solid #e8e8e8' }}>
+        <div style={{
+          flex: 1,
+          padding: '20px 24px',
+          borderRight: '1px solid #e8e8e8',
+        }}>
+          <div style={{ fontSize: 10, color: '#999', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: 6 }}>
+            Total Clicks
+          </div>
+          <div style={{ fontSize: 28, fontWeight: 700, color: '#0a0a0a', lineHeight: 1 }}>
+            {data.total_clicks}
+          </div>
         </div>
-        <div style={{ fontSize: '14px' }}>
-          <strong>Destination: </strong> 
-          <a href={data.original_url} target="_blank" rel="noreferrer">{data.original_url}</a>
+
+        <div style={{ flex: 2, padding: '20px 24px' }}>
+          <div style={{ fontSize: 10, color: '#999', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: 6 }}>
+            Destination
+          </div>
+          <a
+            href={data.original_url}
+            target="_blank"
+            rel="noreferrer"
+            style={{
+              fontSize: 13,
+              color: '#0a0a0a',
+              fontFamily: "'IBM Plex Mono', monospace",
+              fontWeight: 600,
+              wordBreak: 'break-all',
+              textDecoration: 'underline',
+              textUnderlineOffset: '3px',
+            }}
+          >
+            {data.original_url}
+          </a>
         </div>
       </div>
 
-      <div style={{ height: '300px', width: '100%' }}>
-        <canvas ref={canvasRef}></canvas>
+      {/* Chart */}
+      <div style={{ padding: '24px', background: '#fff' }}>
+        <div style={{ fontSize: 10, color: '#999', letterSpacing: '2px', textTransform: 'uppercase', marginBottom: 16 }}>
+          clicks over time
+        </div>
+        <div style={{ height: '260px', width: '100%' }}>
+          <canvas ref={canvasRef} />
+        </div>
       </div>
-    </Card>
+    </div>
   );
 };
