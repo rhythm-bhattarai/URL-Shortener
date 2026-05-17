@@ -1,5 +1,5 @@
 import axios from "axios";
-import { type URLRecord, type ShortenUrlRequest, type RateLimiterResponse } from "../types/Types";
+import { type URLRecord, type ShortenUrlRequest, type RateLimiterResponse, type AnalyticsResponse } from "../types/Types";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
@@ -34,5 +34,24 @@ export const ApiService = {
             // fallback for network-level dropouts eg. server down completely
             throw new Error(error.message || "Network error. Unable to reach backend server.");
         }
+    },
+
+    async listUrls(): Promise<URLRecord[]> {
+        const response = await axios.get<URLRecord[]>(`${API_BASE_URL}/api/shorten/`);
+        return response.data;
+    },
+
+    async trackClick(shortUrlCode: string): Promise<{ clicks: number }> {
+        const response = await axios.post<{ clicks: number }>(
+            `${API_BASE_URL}/api/analytics/${shortUrlCode}/click/`
+        );
+        return response.data;
+    },
+
+    async getAnalytics(shortUrlCode: string): Promise<AnalyticsResponse> {
+        const response = await axios.get<AnalyticsResponse>(
+            `${API_BASE_URL}/api/analytics/${shortUrlCode}/`
+        );
+        return response.data;
     }
 };
