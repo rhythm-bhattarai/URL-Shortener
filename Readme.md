@@ -238,8 +238,8 @@ URL-Shortener/
 ├── frontend/
 │   ├── src/
 │   │   ├── components/     # urlShortener.ts, analytics.ts
-│   │   ├── services/       # api.ts
-│   │   ├── types/          # index.ts
+│   │   ├── services/       # ApiService.ts
+│   │   ├── types/          # Types.ts
 │   │   └── main.ts
 │   └── Dockerfile
 ├── docker-compose.yml
